@@ -1,7 +1,11 @@
 *.class
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+
+#IntelliJ Idea stuff
+out
+.idea/workspace.xml
+.idea/uiDesigner.xml
+
 
 # Package Files #
 *.jar
