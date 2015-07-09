@@ -1,10 +1,9 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.serverSide.BuildHistoryEx;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
 import jetbrains.buildServer.users.SUser;
-import jetbrains.buildServer.util.positioning.PositionAware;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.openapi.buildType.BuildTypeTab;
@@ -12,8 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
+
+import static org.jetbrains.teamcity.wbb.Logic.refreshSituation;
 
 /**
  * @author Leonid Bushuev from JetBrains
@@ -25,10 +25,21 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
   public static final String WBB_TAB_NAME = "WBB";
 
 
-  public WbbTab(@NotNull final WebControllerManager webControllerManager,
+  private final Situations mySituations;
+
+  private final BuildHistoryEx myBuildHistory;
+
+
+
+  public WbbTab(@NotNull final Situations situations,
+                @NotNull final WebControllerManager webControllerManager,
                 @NotNull final ProjectManager projectManager,
-                @NotNull final PluginDescriptor pluginDescriptor) {
+                @NotNull final PluginDescriptor pluginDescriptor,
+                @NotNull final BuildHistoryEx buildHistory)
+  {
     super(WBB_TAB_CODE, WBB_TAB_NAME, webControllerManager, projectManager);
+    this.mySituations = situations;
+    myBuildHistory = buildHistory;
     setPluginName("WBB");
     setIncludeUrl(pluginDescriptor.getPluginResourcesPath("/WBB.jsp"));
     setTabTitle("Who Broke Build");
@@ -51,12 +62,17 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
   }
   */
 
+
   @Override
   protected void fillModel(@NotNull Map<String, Object> model,
                            @NotNull HttpServletRequest request,
-                           @NotNull SBuildType buildType,
+                           @NotNull SBuildType bt,
                            @Nullable SUser user) {
+    final Situation situation = mySituations.getOrCreateFor(bt);
+    refreshSituation(situation, bt);
 
+    SituationBean bean = new SituationBean(situation, bt, myBuildHistory);
+    model.put("sb", bean);
   }
 
 
@@ -64,13 +80,10 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
   public boolean isAvailable(@NotNull HttpServletRequest request) {
     final SBuildType bt = getBuildType(request);
     if (bt == null) return false;
-    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
-    int n = history.size();
-    if (n < 2) return false;
-    final SFinishedBuild topBuild = history.get(0);
-    if (topBuild.getBuildStatus().isSuccessful()) return false;
 
-    return super.isAvailable(request);
+    final Situation situation = mySituations.getOrCreateFor(bt);
+    refreshSituation(situation, bt);
+    return situation.isInIncident();
   }
 
 }
