@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Server" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 7" ALTERNATIVE_JRE_ENABLED="false">
-    <option name="OPEN_IN_BROWSER" value="false" />
-    <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8111" />
-    <option name="COMMON_VM_ARGUMENTS" value="-ea -Xmx384m -XX:MaxPermSize=200m -Ddebug=true -server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless -DTC.res.disableAll=true -Dteamcity.development.mode=true -Dteamcity.development.shadowCopyClasses=true -Dteamcity.data.path=$TeamCityDistribution$/../PluginDev.Data -Dteamcity_logs=$TeamCityDistribution$/logs -Dlog4j.configuration=file:$TeamCityDistribution$/conf/teamcity-server-log4j.xml" />
+  <configuration default="false" name="Server" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 7" ALTERNATIVE_JRE_ENABLED="false" ALTERNATIVE_JRE_PATH="">
+    <option name="OPEN_IN_BROWSER_URL" value="http://localhost:777" />
+    <option name="BROWSER_ID" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+    <option name="COMMON_VM_ARGUMENTS" value="-ea -Xmx384m -XX:MaxPermSize=200m -Ddebug=true -server -XX:+HeapDumpOnOutOfMemoryError -Djava.awt.headless -DTC.res.disableAll=true -Dteamcity.development.mode=true -Dteamcity.development.shadowCopyClasses=true -Dteamcity.data.path=$TeamCityDistribution$/Data -Dteamcity_logs=$TeamCityDistribution$/logs -Dlog4j.configuration=file:$TeamCityDistribution$/conf/teamcity-server-log4j.xml" />
     <option name="UPDATING_POLICY" value="restart-server" />
-    <deployment>
-      <file path="$TeamCityDistribution$/webapps/ROOT">
-        <settings>
-          <option name="CONTEXT_PATH" value="/bs" />
-        </settings>
-      </file>
-    </deployment>
+    <deployment />
     <server-settings>
       <option name="BASE_DIRECTORY_NAME" value="Unnamed__NETPackagesSupport_2" />
     </server-settings>
@@ -45,16 +39,16 @@
     <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Debug">
       <option name="USE_ENV_VARIABLES" value="true" />
       <STARTUP>
-        <option name="USE_DEFAULT" value="true" />
-        <option name="SCRIPT" value="" />
+        <option name="USE_DEFAULT" value="false" />
+        <option name="SCRIPT" value="$TeamCityDistribution$/bin/teamcity-server.bat" />
         <option name="VM_PARAMETERS" value="" />
-        <option name="PROGRAM_PARAMETERS" value="" />
+        <option name="PROGRAM_PARAMETERS" value="run" />
       </STARTUP>
       <SHUTDOWN>
-        <option name="USE_DEFAULT" value="true" />
-        <option name="SCRIPT" value="" />
+        <option name="USE_DEFAULT" value="false" />
+        <option name="SCRIPT" value="$TeamCityDistribution$/bin/teamcity-server.bat" />
         <option name="VM_PARAMETERS" value="" />
-        <option name="PROGRAM_PARAMETERS" value="" />
+        <option name="PROGRAM_PARAMETERS" value="stop" />
       </SHUTDOWN>
     </ConfigurationWrapper>
     <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Profile ">
@@ -75,21 +69,23 @@
     <ConfigurationWrapper VM_VAR="JAVA_OPTS" RunnerId="Run">
       <option name="USE_ENV_VARIABLES" value="true" />
       <STARTUP>
-        <option name="USE_DEFAULT" value="true" />
-        <option name="SCRIPT" value="" />
+        <option name="USE_DEFAULT" value="false" />
+        <option name="SCRIPT" value="$TeamCityDistribution$/bin/teamcity-server.bat" />
         <option name="VM_PARAMETERS" value="" />
-        <option name="PROGRAM_PARAMETERS" value="" />
+        <option name="PROGRAM_PARAMETERS" value="run" />
       </STARTUP>
       <SHUTDOWN>
-        <option name="USE_DEFAULT" value="true" />
-        <option name="SCRIPT" value="" />
+        <option name="USE_DEFAULT" value="false" />
+        <option name="SCRIPT" value="$TeamCityDistribution$/bin/teamcity-server.bat" />
         <option name="VM_PARAMETERS" value="" />
-        <option name="PROGRAM_PARAMETERS" value="" />
+        <option name="PROGRAM_PARAMETERS" value="stop" />
       </SHUTDOWN>
     </ConfigurationWrapper>
     <method>
       <option name="BuildArtifacts" enabled="true">
         <artifact name="deploy" />
+        <artifact name="plugin" />
+        <artifact name="plugin-zip" />
       </option>
     </method>
   </configuration>
