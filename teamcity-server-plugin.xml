@@ -7,7 +7,7 @@
     <version>1.0.0</version> 
     <vendor>
       <name>Leonid Bushuev</name>
-      <url></url>
+      <url>https://github.com/leo-from-spb/teamcity-wbb</url>
     </vendor>
   </info>
   <deployment use-separate-classloader="true"/>
