@@ -1,7 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
 import jetbrains.buildServer.messages.Status;
-import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
 import jetbrains.buildServer.util.Couple;
@@ -10,8 +9,7 @@ import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Leonid Bushuev from JetBrains
@@ -20,8 +18,7 @@ abstract class Logic {
 
 
   static void refreshSituation(@NotNull final Situation situation,
-                               @NotNull final SBuildType bt,
-                               @NotNull final BuildHistory bh) {
+                               @NotNull final SBuildType bt) {
     boolean valid = situation.isValid();
     if (valid) {
       final List<SFinishedBuild> history1 = bt.getHistory(null, true, false);
@@ -124,6 +121,33 @@ abstract class Logic {
     if (committerIds.isEmpty()) return 0;
     else return committerIds.get(0);
   }
+
+
+  @Nullable
+  static SortedSet<Long> suggestCheckPoints(@NotNull final Situation situation) {
+    final Track track = situation.getTrack();
+    if (track == null) return null;
+    final List<Track.Mile> miles = track.miles;
+    if (miles == null || miles.size() < 2) return null;
+
+    SortedSet<Long> suggestions = new TreeSet<Long>();
+
+    final ArrayList<Track.Mile> backMiles = new ArrayList<Track.Mile>(miles);
+    Collections.reverse(backMiles);
+
+    int innerPoints = backMiles.size()-1;
+    int slots = situation.settings.getParallelLimit();  // TODO minus already queued/running
+    double delta = (innerPoints + 1.0) / (slots + 1.0);
+    for (int i = 1; i <= slots; i++) {
+      int index = (int) Math.round(i * delta);
+      if (index >= backMiles.size()) continue;
+      Long point = backMiles.get(index).getLastModification();
+      suggestions.add(point);
+    }
+
+    return suggestions;
+  }
+
 
 
 }

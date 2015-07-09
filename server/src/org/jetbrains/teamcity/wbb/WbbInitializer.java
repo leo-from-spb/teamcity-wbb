@@ -18,14 +18,16 @@ public class WbbInitializer {
   //// MY SERVICE CLASSES \\\\
 
   @NotNull
-  private final PrimaryServerListener serverListener;
+  private final WbbServerListener serverListener;
 
 
 
-  public WbbInitializer(@NotNull final EventDispatcher<BuildServerListener> eventDispatcher) {
+  public WbbInitializer(@NotNull final EventDispatcher<BuildServerListener> eventDispatcher,
+                        @NotNull final Situations situations,
+                        @NotNull final WbbBuildStarter buildStarter) {
     this.eventDispatcher = eventDispatcher;
 
-    serverListener = new PrimaryServerListener();
+    serverListener = new WbbServerListener(situations, buildStarter);
   }
 
 

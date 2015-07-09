@@ -75,7 +75,7 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
                            @NotNull SBuildType bt,
                            @Nullable SUser user) {
     final Situation situation = mySituations.getOrCreateFor(bt);
-    refreshSituation(situation, bt, myBuildHistory);
+    refreshSituation(situation, bt);
 
     SituationBean bean = new SituationBean(situation, bt, myBuildHistory, myUserModel);
     model.put("sb", bean);
@@ -88,7 +88,7 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
     if (bt == null) return false;
 
     final Situation situation = mySituations.getOrCreateFor(bt);
-    refreshSituation(situation, bt, myBuildHistory);
+    refreshSituation(situation, bt);
     return situation.isInIncident();
   }
 

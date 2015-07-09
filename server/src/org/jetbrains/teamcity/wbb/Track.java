@@ -1,5 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,8 +20,17 @@ public class Track {
 
     public Mile(long authorId, @NotNull List<Long> modificationIds) {
       this.authorId = authorId;
-      this.modificationIds = modificationIds;
+      this.modificationIds = ImmutableList.copyOf(modificationIds);
+      assert !modificationIds.isEmpty();
     }
+
+
+    @NotNull
+    public Long getLastModification() {
+      int n = modificationIds.size();
+      return modificationIds.get(n - 1);
+    }
+
   }
 
 

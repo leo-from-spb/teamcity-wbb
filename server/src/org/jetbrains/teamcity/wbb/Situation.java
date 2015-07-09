@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
  **/
 public class Situation {
 
-  //// IDENTITY STATE \\\\
+  //// IDENTITY STATE AND SETTINGS \\\\
 
   /**
    * Internal id of the build configuration.
@@ -18,6 +18,10 @@ public class Situation {
    * External id of the build configuration.
    */
   public final String btName;
+
+
+  // TODO load from build configuration
+  public final WbbSettings settings = new WbbSettings();
 
 
   //// VARIABLE STATE \\\\
@@ -32,7 +36,6 @@ public class Situation {
 
 
   private boolean myValid;
-
 
 
 
@@ -86,4 +89,5 @@ public class Situation {
   public void setValid(boolean valid) {
     myValid = valid;
   }
+
 }
