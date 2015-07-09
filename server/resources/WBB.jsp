@@ -14,7 +14,7 @@
 
             <c:if test="${not empty sb.redBuild}">
                 <tr>
-                    <td colspan="7">The first build that detects problems:</td>
+                    <td colspan="7"><b>The first build that detects problems:</b></td>
                 </tr>
                 <tr>
                   <bs:buildRow build="${sb.redBuild}"
@@ -43,7 +43,7 @@
 
             <c:if test="${not empty sb.greenBuild}">
                 <tr>
-                    <td colspan="7">The last successful build:</td>
+                    <td colspan="7"><b>The last successful build:</b></td>
                 </tr>
                 <tr>
                   <bs:buildRow build="${sb.greenBuild}"
@@ -67,6 +67,18 @@
         </table>
 
 
+    </c:if>
+
+    <c:if test="${not empty sb.authors}">
+        <br/>
+        <div>
+            <b>Suspected Authors:</b>
+            <ul>
+            <c:forEach items="${sb.authors}" var="a">
+                <li>${a.name}</li>
+            </c:forEach>
+            </ul>
+        </div>
     </c:if>
 
 

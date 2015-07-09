@@ -4,10 +4,13 @@ import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.util.Couple;
 import jetbrains.buildServer.vcs.SVcsModification;
+import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,51 +33,97 @@ abstract class Logic {
     if (valid) return;
 
     // refresh
-    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
-    final Incident incident = findIncident(history);
+    final Couple<SFinishedBuild> incidentBuilds = findIncidentBuilds(bt);
+    if (incidentBuilds == null) {
+      situation.setIncident(null);
+      situation.setTrack(null);
+      situation.setValid(true);
+      return;
+    }
+
+    final Incident incident = new Incident(incidentBuilds);
     situation.setIncident(incident);
-    if (incident == null) return;
 
-    final SFinishedBuild redBuild = bh.findEntry(incident.getRedBuildId());
-    final SFinishedBuild greenBuild = bh.findEntry(incident.getGreenBuildId());
-
-    if (redBuild == null) return;
-
-    final List<SVcsModification> containingChanges = redBuild.getContainingChanges();
-
+    final Track track = analyzeChanges(incidentBuilds);
+    situation.setTrack(track);
   }
+
+
 
 
   @Nullable
   static Incident findIncident(@NotNull final SBuildType bt) {
-    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
-    return findIncident(history);
+    final Couple<SFinishedBuild> builds = findIncidentBuilds(bt);
+    return builds != null ? new Incident(builds) : null;
+  }
+
+
+  @Nullable
+  static Couple<SFinishedBuild> findIncidentBuilds(@NotNull final SBuildType bt) {
+    SFinishedBuild lastBuild = getLastBuild(bt);
+    if (lastBuild == null) return null;
+    if (!lastBuild.getBuildStatus().isFailed()) return null;
+
+    SFinishedBuild rb,
+                   gb = null;
+    boolean incidentFound = false;
+    rb = lastBuild;
+    SFinishedBuild nb = rb.getPreviousFinished();
+    while (nb != null) {
+      Status status = nb.getBuildStatus();
+      if (status.isFailed()) {
+        rb = nb;
+        nb = rb.getPreviousFinished();
+        continue;
+      }
+      if (status.isSuccessful()) {
+        gb = nb;
+        incidentFound = true;
+        break;
+      }
+      nb = nb.getPreviousFinished();
+    }
+    if (!incidentFound) return null;
+
+    return Couple.of(rb, gb);
   }
 
   @Nullable
-  private static Incident findIncident(@NotNull final List<SFinishedBuild> history) {
-    final int n = history.size();
-    if (n < 2) return null;
-
-    int r = -1,
-        g = -1;
-    for (int i = 0; i < n && g < 0; i++) {
-      SFinishedBuild b = history.get(i);
-      if (b.isPersonal() || b.isInternalError() || b.getCanceledInfo() != null) continue;
-      Status status = b.getBuildStatus();
-      if (g < 0) {
-        if (status.isFailed()) r = i; // sic! may be re-assigned several times,
-                                      // we need the last red before the first green
-        if (status.isSuccessful()) g = i;
-      }
-    }
-
-    if (g < 0 || r < 0) return null;
-
-    final SFinishedBuild redBuild = history.get(r);
-    final SFinishedBuild greenBuild = history.get(g);
-
-    return new Incident(greenBuild, redBuild);
+  private static SFinishedBuild getLastBuild(@NotNull SBuildType bt) {
+    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
+    return history.isEmpty() ? null : history.get(0);
+    // return bt.getLastChangesFinished(); // it's only from master branch
   }
+
+
+  static Track analyzeChanges(@NotNull final Couple<SFinishedBuild> builds) {
+    SFinishedBuild rb = builds.a,
+                   gb = builds.b;
+    final List<SVcsModification> changes =
+            rb.getChanges(SelectPrevBuildPolicy.SINCE_LAST_SUCCESSFULLY_FINISHED_BUILD, false);
+
+    ArrayList<Track.Mile> miles = new ArrayList<Track.Mile>(changes.size());
+    ArrayList<Long> currentChanges = new ArrayList<Long>(changes.size());
+    long currentAuthor = 0;
+    for (SVcsModification change : changes) {
+      long author = getAuthor(change);
+      if (currentAuthor != author) {
+        if (!currentChanges.isEmpty()) miles.add(new Track.Mile(currentAuthor, currentChanges));
+        currentChanges.clear();
+        currentAuthor = author;
+      }
+      currentChanges.add(change.getId());
+    }
+    if (!currentChanges.isEmpty()) miles.add(new Track.Mile(currentAuthor, currentChanges));
+
+    return new Track(miles);
+  }
+
+  private static long getAuthor(SVcsModification change) {
+    final List<Long> committerIds = change.getCommitterIds();
+    if (committerIds.isEmpty()) return 0;
+    else return committerIds.get(0);
+  }
+
 
 }

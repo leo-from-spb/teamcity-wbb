@@ -1,6 +1,7 @@
 package org.jetbrains.teamcity.wbb;
 
 import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.util.Couple;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -8,23 +9,27 @@ import org.jetbrains.annotations.NotNull;
  **/
 public final class Incident {
 
-  private final long myGreenBuildId;
-
   private final long myRedBuildId;
 
-  @NotNull
-  private final String myGreenBuildNr;
+  private final long myGreenBuildId;
 
   @NotNull
   private final String myRedBuildNr;
 
+  @NotNull
+  private final String myGreenBuildNr;
 
 
-  public Incident(@NotNull SFinishedBuild greenBuild, @NotNull SFinishedBuild redBuild) {
+
+  public Incident(@NotNull SFinishedBuild redBuild, @NotNull SFinishedBuild greenBuild) {
     myGreenBuildId = greenBuild.getBuildId();
     myGreenBuildNr = greenBuild.getBuildNumber();
     myRedBuildId = redBuild.getBuildId();
     myRedBuildNr = redBuild.getBuildNumber();
+  }
+
+  public Incident(@NotNull final Couple<SFinishedBuild> couple) {
+    this(couple.a, couple.b);
   }
 
 

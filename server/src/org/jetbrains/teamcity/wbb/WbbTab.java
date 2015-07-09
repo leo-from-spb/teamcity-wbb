@@ -4,6 +4,7 @@ import jetbrains.buildServer.serverSide.BuildHistoryEx;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
 import jetbrains.buildServer.web.openapi.buildType.BuildTypeTab;
@@ -27,19 +28,24 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
 
   private final Situations mySituations;
 
+  @NotNull
   private final BuildHistoryEx myBuildHistory;
 
+  @NotNull
+  private final UserModel myUserModel;
 
 
   public WbbTab(@NotNull final Situations situations,
                 @NotNull final WebControllerManager webControllerManager,
                 @NotNull final ProjectManager projectManager,
                 @NotNull final PluginDescriptor pluginDescriptor,
-                @NotNull final BuildHistoryEx buildHistory)
+                @NotNull final BuildHistoryEx buildHistory,
+                @NotNull final UserModel userModel)
   {
     super(WBB_TAB_CODE, WBB_TAB_NAME, webControllerManager, projectManager);
     this.mySituations = situations;
     myBuildHistory = buildHistory;
+    myUserModel = userModel;
     setPluginName("WBB");
     setIncludeUrl(pluginDescriptor.getPluginResourcesPath("/WBB.jsp"));
     setTabTitle("Who Broke Build");
@@ -69,9 +75,9 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
                            @NotNull SBuildType bt,
                            @Nullable SUser user) {
     final Situation situation = mySituations.getOrCreateFor(bt);
-    refreshSituation(situation, bt);
+    refreshSituation(situation, bt, myBuildHistory);
 
-    SituationBean bean = new SituationBean(situation, bt, myBuildHistory);
+    SituationBean bean = new SituationBean(situation, bt, myBuildHistory, myUserModel);
     model.put("sb", bean);
   }
 
@@ -82,7 +88,7 @@ public class WbbTab extends BuildTypeTab // implements PositionAware
     if (bt == null) return false;
 
     final Situation situation = mySituations.getOrCreateFor(bt);
-    refreshSituation(situation, bt);
+    refreshSituation(situation, bt, myBuildHistory);
     return situation.isInIncident();
   }
 

@@ -27,6 +27,10 @@ public class Situation {
   @Nullable
   private Incident myIncident;
 
+  @Nullable
+  private Track myTrack;
+
+
   private boolean myValid;
 
 
@@ -61,6 +65,19 @@ public class Situation {
     return myIncident != null;
   }
 
+
+  @Nullable
+  public Track getTrack() {
+    return myTrack;
+  }
+
+  public void setTrack(@Nullable Track track) {
+    myTrack = track;
+  }
+
+  public boolean isTrackExist() {
+    return myTrack != null && myTrack.miles != null && !myTrack.miles.isEmpty();
+  }
 
   public boolean isValid() {
     return myValid;
