@@ -8,10 +8,8 @@ import org.jetbrains.annotations.NotNull;
  **/
 public final class Incident {
 
-  @NotNull
   private final long myGreenBuildId;
 
-  @NotNull
   private final long myRedBuildId;
 
   @NotNull

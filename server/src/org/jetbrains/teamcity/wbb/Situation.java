@@ -27,6 +27,9 @@ public class Situation {
   @Nullable
   private Incident myIncident;
 
+  private boolean myValid;
+
+
 
 
 
@@ -56,5 +59,14 @@ public class Situation {
 
   public boolean isInIncident() {
     return myIncident != null;
+  }
+
+
+  public boolean isValid() {
+    return myValid;
+  }
+
+  public void setValid(boolean valid) {
+    myValid = valid;
   }
 }

@@ -1,8 +1,10 @@
 package org.jetbrains.teamcity.wbb;
 
 import jetbrains.buildServer.messages.Status;
+import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.vcs.SVcsModification;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,15 +17,31 @@ abstract class Logic {
 
 
   static void refreshSituation(@NotNull final Situation situation,
-                               @NotNull final SBuildType bt) {
-    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
-    long lastBuildId = history.isEmpty() ? 0 : history.get(0).getBuildId();
-    if (situation.getLastKnownBuildId() == lastBuildId) return;
+                               @NotNull final SBuildType bt,
+                               @NotNull final BuildHistory bh) {
+    boolean valid = situation.isValid();
+    if (valid) {
+      final List<SFinishedBuild> history1 = bt.getHistory(null, true, false);
+      long lastBuildId = history1.isEmpty() ? 0 : history1.get(0).getBuildId();
+      valid = situation.getLastKnownBuildId() == lastBuildId;
+      situation.setLastKnownBuildId(lastBuildId);
+    }
+
+    if (valid) return;
 
     // refresh
+    final List<SFinishedBuild> history = bt.getHistory(null, false, true);
     final Incident incident = findIncident(history);
     situation.setIncident(incident);
-    situation.setLastKnownBuildId(lastBuildId);
+    if (incident == null) return;
+
+    final SFinishedBuild redBuild = bh.findEntry(incident.getRedBuildId());
+    final SFinishedBuild greenBuild = bh.findEntry(incident.getGreenBuildId());
+
+    if (redBuild == null) return;
+
+    final List<SVcsModification> containingChanges = redBuild.getContainingChanges();
+
   }
 
 
@@ -38,23 +56,23 @@ abstract class Logic {
     final int n = history.size();
     if (n < 2) return null;
 
-    int g = -1,
-        r = -1;
+    int r = -1,
+        g = -1;
     for (int i = 0; i < n && g < 0; i++) {
       SFinishedBuild b = history.get(i);
       if (b.isPersonal() || b.isInternalError() || b.getCanceledInfo() != null) continue;
       Status status = b.getBuildStatus();
       if (g < 0) {
-        if (status.isSuccessful()) g = i;
         if (status.isFailed()) r = i; // sic! may be re-assigned several times,
                                       // we need the last red before the first green
+        if (status.isSuccessful()) g = i;
       }
     }
 
     if (g < 0 || r < 0) return null;
 
-    final SFinishedBuild greenBuild = history.get(g);
     final SFinishedBuild redBuild = history.get(r);
+    final SFinishedBuild greenBuild = history.get(g);
 
     return new Incident(greenBuild, redBuild);
   }
