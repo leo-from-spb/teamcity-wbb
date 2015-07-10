@@ -81,10 +81,16 @@
             <b>Suspected Authors:</b>
             <ul>
             <c:forEach items="${sb.authors}" var="a">
-                <li>${a.name}</li>
+                <li><c:out value="${a.name}"/></li>
             </c:forEach>
             </ul>
         </div>
+    </c:if>
+
+    <c:if test="${not empty sb.autoAssignedUser}">
+        <br/>
+        Automatically assigned investigation to
+        <b><c:out value="${sb.autoAssignedUser.name}"/></b>
     </c:if>
 
 

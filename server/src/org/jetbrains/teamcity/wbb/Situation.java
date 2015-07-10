@@ -35,6 +35,9 @@ public class Situation {
   private Track myTrack;
 
 
+  private long myAssignedToUserId;
+
+
   private boolean myValid;
 
 
@@ -81,6 +84,20 @@ public class Situation {
   public boolean isTrackExist() {
     return myTrack != null && myTrack.miles != null && !myTrack.miles.isEmpty();
   }
+
+
+  public long getAssignedToUserId() {
+    return myAssignedToUserId;
+  }
+
+  public void setAssignedToUserId(long assignedToUserId) {
+    myAssignedToUserId = assignedToUserId;
+  }
+
+  public boolean isAlreadyAssigned() {
+    return myAssignedToUserId > 0;
+  }
+
 
   public boolean isValid() {
     return myValid;

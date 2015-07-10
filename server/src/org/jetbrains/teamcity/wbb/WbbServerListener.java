@@ -1,10 +1,17 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.responsibility.BuildTypeResponsibilityFacade;
+import jetbrains.buildServer.responsibility.ResponsibilityEntry;
+import jetbrains.buildServer.responsibility.ResponsibilityEntryFactory;
 import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.users.SUser;
+import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Date;
 
 /**
  * @author Leonid Bushuev from JetBrains
@@ -21,14 +28,28 @@ public class WbbServerListener extends BuildServerAdapter {
   @NotNull
   private final BuildHistory myBuildHistory;
 
+  @NotNull
+  private final BuildTypeResponsibilityFacade myResponsibilityFacade;
+
+  @NotNull
+  private final UserModel myUserModel;
+
+
+  private static final String AUTO_ASSIGNED_COMMENT =
+          "Automatically assigned by WBB plugin";
+
 
 
   public WbbServerListener(@NotNull final Situations situations,
                            @NotNull final WbbBuildStarter buildStarter,
-                           @NotNull final BuildHistory buildHistory) {
+                           @NotNull final BuildHistory buildHistory,
+                           @NotNull final BuildTypeResponsibilityFacade responsibilityFacade,
+                           @NotNull final UserModel userModel) {
     mySituations = situations;
     myBuildStarter = buildStarter;
     myBuildHistory = buildHistory;
+    myResponsibilityFacade = responsibilityFacade;
+    myUserModel = userModel;
   }
 
 
@@ -43,9 +64,36 @@ public class WbbServerListener extends BuildServerAdapter {
     situation.setValid(false);
     Logic.refreshSituation(situation, bt, myBuildHistory);
 
-    if (situation.settings.isAutoBuild()) {
-      myBuildStarter.startIteration(situation, bt);
+    final Track track = situation.getTrack();
+    if (track == null) return;
+
+    if (track.isAuthorRevealed()) {
+      if (!situation.isAlreadyAssigned()) {
+        long authorId = track.getRevealedAuthorId();
+        SUser author = myUserModel.findUserById(authorId);
+        if (author == null) return;
+        ResponsibilityEntry responsibility =
+                myResponsibilityFacade.findBuildTypeResponsibility(bt);
+        if (responsibility != null && responsibility.getState() == ResponsibilityEntry.State.TAKEN) return; // already taken
+
+        ResponsibilityEntry newEntry =
+                ResponsibilityEntryFactory.createEntry(bt,
+                                                       ResponsibilityEntry.State.TAKEN,
+                                                       author,
+                                                       null,
+                                                       new Date(),
+                                                       AUTO_ASSIGNED_COMMENT,
+                                                       ResponsibilityEntry.RemoveMethod.WHEN_FIXED);
+        myResponsibilityFacade.setBuildTypeResponsibility(bt, newEntry);
+        situation.setAssignedToUserId(authorId);
+      }
     }
+    else {
+      if (situation.settings.isAutoBuild()) {
+        myBuildStarter.startIteration(situation, bt);
+      }
+    }
+
   }
 
 

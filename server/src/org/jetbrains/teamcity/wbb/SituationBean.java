@@ -101,5 +101,11 @@ public class SituationBean {
     return myAuthors;
   }
 
+  @Nullable
+  public SUser getAutoAssignedUser() {
+    final long aauId = getSituation().getAssignedToUserId();
+    if (aauId == 0) return null;
+    return myUserModel.findUserById(aauId);
+  }
 
 }

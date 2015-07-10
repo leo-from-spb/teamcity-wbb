@@ -34,6 +34,7 @@ abstract class Logic {
     if (incidentBuilds == null) {
       situation.setIncident(null);
       situation.setTrack(null);
+      situation.setAssignedToUserId(0);
       situation.setValid(true);
       return;
     }
@@ -43,6 +44,8 @@ abstract class Logic {
 
     final Track track = analyzeChanges(incidentBuilds);
     situation.setTrack(track);
+
+    situation.setValid(true);
   }
 
 

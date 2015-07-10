@@ -1,7 +1,9 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.responsibility.BuildTypeResponsibilityFacade;
 import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.BuildServerListener;
+import jetbrains.buildServer.users.UserModel;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,15 +28,20 @@ public class WbbInitializer {
   public WbbInitializer(@NotNull final EventDispatcher<BuildServerListener> eventDispatcher,
                         @NotNull final Situations situations,
                         @NotNull final WbbBuildStarter buildStarter,
-                        @NotNull final BuildHistory buildHistory) {
+                        @NotNull final BuildHistory buildHistory,
+                        @NotNull final BuildTypeResponsibilityFacade responsibilityFacade,
+                        @NotNull final UserModel userModel) {
     this.eventDispatcher = eventDispatcher;
 
-    serverListener = new WbbServerListener(situations, buildStarter, buildHistory);
+    serverListener = new WbbServerListener(situations,
+                                           buildStarter,
+                                           buildHistory,
+                                           responsibilityFacade,
+                                           userModel);
   }
 
 
   public void init() {
-    //noinspection unchecked
     eventDispatcher.addListener(serverListener);
   }
 
