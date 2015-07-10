@@ -15,10 +15,10 @@ public class Track {
     public final long authorId;
 
     @NotNull
-    public final List<Long> modificationIds;
+    public final List<Revision> modificationIds;
 
 
-    public Mile(long authorId, @NotNull List<Long> modificationIds) {
+    public Mile(long authorId, @NotNull List<Revision> modificationIds) {
       this.authorId = authorId;
       this.modificationIds = ImmutableList.copyOf(modificationIds);
       assert !modificationIds.isEmpty();
@@ -28,7 +28,7 @@ public class Track {
     @NotNull
     public Long getLastModification() {
       int n = modificationIds.size();
-      return modificationIds.get(n - 1);
+      return modificationIds.get(n - 1).id;
     }
 
   }

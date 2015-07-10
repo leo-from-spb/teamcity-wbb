@@ -114,11 +114,14 @@ abstract class Logic {
   static Track analyzeChanges(@NotNull final Couple<SFinishedBuild> builds) {
     SFinishedBuild rb = builds.a,
                    gb = builds.b;
-    final List<SVcsModification> changes =
+    final List<SVcsModification> changes0 =
             rb.getChanges(SelectPrevBuildPolicy.SINCE_LAST_SUCCESSFULLY_FINISHED_BUILD, false);
 
+    final List<SVcsModification> changes = new ArrayList<SVcsModification>(changes0);
+    Collections.reverse(changes);
+
     ArrayList<Track.Mile> miles = new ArrayList<Track.Mile>(changes.size());
-    ArrayList<Long> currentChanges = new ArrayList<Long>(changes.size());
+    ArrayList<Revision> currentChanges = new ArrayList<Revision>(changes.size());
     long currentAuthor = 0;
     for (SVcsModification change : changes) {
       long author = getAuthor(change);
@@ -127,7 +130,7 @@ abstract class Logic {
         currentChanges.clear();
         currentAuthor = author;
       }
-      currentChanges.add(change.getId());
+      currentChanges.add(new Revision(change.getId(), change.getDescription()));
     }
     if (!currentChanges.isEmpty()) miles.add(new Track.Mile(currentAuthor, currentChanges));
 
@@ -150,17 +153,22 @@ abstract class Logic {
 
     SortedSet<Long> suggestions = new TreeSet<Long>();
 
-    final ArrayList<Track.Mile> backMiles = new ArrayList<Track.Mile>(miles);
-    Collections.reverse(backMiles);
-
-    int innerPoints = backMiles.size()-1;
+    int innerPoints = miles.size()-1;
     int slots = situation.settings.getParallelLimit();  // TODO minus already queued/running
-    double delta = (innerPoints + 1.0) / (slots + 1.0);
-    for (int i = 0; i < slots; i++) {
-      int index = (int) Math.round(i * delta);
-      if (index >= backMiles.size()) continue;
-      Long point = backMiles.get(index).getLastModification();
-      suggestions.add(point);
+    if (innerPoints <= slots) {
+      for (int i = 0; i < innerPoints; i++) {
+        Long point = miles.get(i).getLastModification();
+        suggestions.add(point);
+      }
+    }
+    else {
+      double delta = (innerPoints + 1.0) / (slots + 1.0);
+      for (int i = 0; i < slots; i++) {
+        int index = (int) Math.round(i * delta);
+        if (index >= miles.size()) continue;
+        Long point = miles.get(index).getLastModification();
+        suggestions.add(point);
+      }
     }
 
     return suggestions;
