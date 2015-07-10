@@ -115,8 +115,7 @@ public class SituationBean {
   }
 
   public boolean isHasIntermediateBuilds() {
-    final SortedSet<IntermediateBuild> intermediateBuilds = mySituation.getIntermediateBuilds();
-    return intermediateBuilds != null && !intermediateBuilds.isEmpty();
+    return mySituation.countIntermediateBuilds() > 0;
   }
 
   public List<IB> getIntermediateBuilds() {

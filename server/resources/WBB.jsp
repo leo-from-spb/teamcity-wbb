@@ -106,8 +106,10 @@
         </table>
 
         <br/>
-        <form action="/wbb/once.html" onclick="{return WbbForm.doOnce(this)}">
-            <input type="button" value="Do Once"/>
+        <form action="/wbb/button.html">
+            <input type="button" value="Do Once" onclick="{return WbbForm.doAction('iteration')}"/>
+            <input type="button" value="Auto ON" onclick="{return WbbForm.doAction('autoON')}"/>
+            <input type="button" value="Auto OFF" onclick="{return WbbForm.doAction('autoOFF')}"/>
         </form>
 
 
@@ -135,12 +137,16 @@
     <script type="text/javascript">
 
         WbbForm = {
-            doOnce: function() {
+            doAction: function(operation) {
                 $j(":button").disabled = true;
                 var q = window.location.search.substring(1);
                 $j.ajax({
-                            url: "/wbb/once.html?"+q,
-                            dataType: 'json'
+                            url: "/wbb/button.html?operation="+operation+"&"+q,
+                            method: 'post',
+                            dataType: 'json',
+                            onSuccess: function(z) {
+                                location.reload();
+                            }
                         });
                 return false;
             }

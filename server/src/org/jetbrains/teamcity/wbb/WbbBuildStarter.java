@@ -39,13 +39,12 @@ public class WbbBuildStarter {
                @NotNull final SBuildType bt,
                @NotNull final SortedSet<Long> revisionsIds) {
     for (Long revisionId : revisionsIds) {
-      enqueue(situation, bt, revisionId);
+      enqueue(bt, revisionId);
       situation.setValid(false);
     }
   }
 
-  void enqueue(@NotNull final Situation situation,
-               @NotNull final SBuildType bt,
+  void enqueue(@NotNull final SBuildType bt,
                @NotNull final Long revisionId) {
     final SVcsModification modification = myModificationHistory.findChangeById(revisionId);
     if (modification == null) return;

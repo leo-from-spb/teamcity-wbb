@@ -204,7 +204,9 @@ abstract class Logic {
     SortedSet<Long> suggestions = new TreeSet<Long>();
 
     int innerPoints = miles.size()-1;
-    int slots = situation.settings.getParallelLimit();  // TODO minus already queued/running
+    int slots = situation.settings.getParallelLimit() - situation.countIntermediateBuilds();
+    if (slots <= 0) return suggestions;
+
     if (innerPoints <= slots) {
       for (int i = 0; i < innerPoints; i++) {
         Long point = miles.get(i).getLastModification();

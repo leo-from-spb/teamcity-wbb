@@ -97,6 +97,11 @@ public class Situation {
     myIntermediateBuilds = intermediateBuilds;
   }
 
+  public int countIntermediateBuilds() {
+    final SortedSet<IntermediateBuild> ibs = myIntermediateBuilds;
+    return ibs != null ? ibs.size() : 0;
+  }
+
   public long getAssignedToUserId() {
     return myAssignedToUserId;
   }

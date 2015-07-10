@@ -61,21 +61,31 @@ public class WbbController extends BaseController {
     String req = request.getRequestURL().toString().toLowerCase();
     Map<String, String[]> parameters = new TreeMap<String, String[]>(String.CASE_INSENSITIVE_ORDER);
     parameters.putAll(request.getParameterMap());
-    String btName = getParameter(parameters);
-    if (req.contains("/once.html")) {
+    String operation = getParameter(parameters, "operation");
+    if (operation == null) return null;
+    String btName = getParameter(parameters, "buildTypeId");
+    if (btName == null) return null;
+
+    if (operation.equalsIgnoreCase("iteration")) {
       doIterateOnce(btName);
     }
+    if (operation.equalsIgnoreCase("autoON")) {
+      doAutoOn(btName);
+    }
+    if (operation.equalsIgnoreCase("autoOFF")) {
+      doAutoOff(btName);
+    }
+
     return null;
   }
 
-  private String getParameter(Map<String, String[]> parameters) {
-    String[] pa = parameters.get("buildTypeId");
+  private String getParameter(Map<String, String[]> parameters, final String parameterName) {
+    String[] pa = parameters.get(parameterName);
     if (pa == null || pa.length == 0) return null;
     return pa[0];
   }
 
-  private void doIterateOnce(String btName) {
-    if (btName == null) return;
+  private void doIterateOnce(@NotNull final String btName) {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
@@ -83,6 +93,24 @@ public class WbbController extends BaseController {
     if (situation.isInIncident()) {
       myBuildStarter.startIteration(situation, bt);
     }
+  }
+
+  private void doAutoOn(@NotNull final String btName) {
+    final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
+    if (bt == null) return;
+    final Situation situation = mySituations.getOrCreateFor(bt);
+    situation.settings.setAutoAssign(true);
+    Logic.refreshSituation(situation, bt, myBuildHistory, myBuildQueue, myRunningBuildsManager);
+    if (situation.isInIncident()) {
+      myBuildStarter.startIteration(situation, bt);
+    }
+  }
+
+  private void doAutoOff(@NotNull final String btName) {
+    final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
+    if (bt == null) return;
+    final Situation situation = mySituations.getOrCreateFor(bt);
+    situation.settings.setAutoAssign(false);
   }
 
 
