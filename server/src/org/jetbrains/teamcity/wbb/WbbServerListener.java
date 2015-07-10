@@ -5,8 +5,6 @@ import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.SortedSet;
-
 /**
  * @author Leonid Bushuev from JetBrains
  **/
@@ -38,9 +36,7 @@ public class WbbServerListener extends BuildServerAdapter {
     Logic.refreshSituation(situation, bt);
 
     if (situation.settings.isAutoBuild()) {
-      final SortedSet<Long> suggestions = Logic.suggestCheckPoints(situation);
-      if (suggestions == null || suggestions.isEmpty()) return;
-      myBuildStarter.enqueue(situation, bt, suggestions);
+      myBuildStarter.startIteration(situation, bt);
     }
   }
 

@@ -55,6 +55,7 @@ abstract class Logic {
   }
 
 
+
   @Nullable
   static Couple<SFinishedBuild> findIncidentBuilds(@NotNull final SBuildType bt) {
     SFinishedBuild lastBuild = getLastBuild(bt);

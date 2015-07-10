@@ -3,6 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="bs" tagdir="/WEB-INF/tags" %>
 
 <jsp:useBean id="sb" type="org.jetbrains.teamcity.wbb.SituationBean" scope="request"/>
 
@@ -66,6 +67,11 @@
 
         </table>
 
+        <br/>
+        <form action="/wbb/once.html" onclick="{return WbbForm.doOnce(this)}">
+            <input type="button" value="Do Once"/>
+        </form>
+
 
     </c:if>
 
@@ -82,4 +88,22 @@
     </c:if>
 
 
+    <script type="text/javascript">
+
+        WbbForm = {
+            doOnce: function() {
+                $j(":button").disabled = true;
+                var q = window.location.search.substring(1);
+                $j.ajax({
+                            url: "/wbb/once.html?"+q,
+                            dataType: 'json'
+                        });
+                return false;
+            }
+        }
+
+    </script>
+
+
+    
 </div>

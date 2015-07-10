@@ -29,6 +29,14 @@ public class WbbBuildStarter {
   }
 
 
+  void startIteration(@NotNull final Situation situation,
+                      @NotNull final SBuildType bt) {
+    final SortedSet<Long> suggestions = Logic.suggestCheckPoints(situation);
+    if (suggestions == null || suggestions.isEmpty()) return;
+    enqueue(situation, bt, suggestions);
+  }
+
+
   void enqueue(@NotNull final Situation situation,
                @NotNull final SBuildType bt,
                @NotNull final SortedSet<Long> revisionsIds) {
@@ -49,5 +57,7 @@ public class WbbBuildStarter {
     final BuildPromotion promotion = bc.createPromotion();
     promotion.addToQueue("Automatically by WBB plugin");
   }
+
+
 
 }

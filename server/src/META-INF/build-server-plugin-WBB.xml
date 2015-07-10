@@ -10,6 +10,8 @@
   <bean class="org.jetbrains.teamcity.wbb.Situations"/>
   <bean class="org.jetbrains.teamcity.wbb.WbbBuildStarter"/>
   <bean class="org.jetbrains.teamcity.wbb.WbbInitializer" init-method="init"/>
+  <bean class="org.jetbrains.teamcity.wbb.WbbController"/>
   <bean class="org.jetbrains.teamcity.wbb.WbbTab"/>
+
 
 </beans>
