@@ -1,5 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.BuildServerListener;
 import jetbrains.buildServer.util.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +25,11 @@ public class WbbInitializer {
 
   public WbbInitializer(@NotNull final EventDispatcher<BuildServerListener> eventDispatcher,
                         @NotNull final Situations situations,
-                        @NotNull final WbbBuildStarter buildStarter) {
+                        @NotNull final WbbBuildStarter buildStarter,
+                        @NotNull final BuildHistory buildHistory) {
     this.eventDispatcher = eventDispatcher;
 
-    serverListener = new WbbServerListener(situations, buildStarter);
+    serverListener = new WbbServerListener(situations, buildStarter, buildHistory);
   }
 
 

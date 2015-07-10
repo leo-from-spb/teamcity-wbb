@@ -1,8 +1,7 @@
 package org.jetbrains.teamcity.wbb;
 
 import jetbrains.buildServer.messages.Status;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SFinishedBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.Couple;
 import jetbrains.buildServer.vcs.SVcsModification;
 import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
@@ -18,7 +17,8 @@ abstract class Logic {
 
 
   static void refreshSituation(@NotNull final Situation situation,
-                               @NotNull final SBuildType bt) {
+                               @NotNull final SBuildType bt,
+                               @NotNull final BuildHistory bh) {
     boolean valid = situation.isValid();
     if (valid) {
       final List<SFinishedBuild> history1 = bt.getHistory(null, true, false);
@@ -30,7 +30,7 @@ abstract class Logic {
     if (valid) return;
 
     // refresh
-    final Couple<SFinishedBuild> incidentBuilds = findIncidentBuilds(bt);
+    final Couple<SFinishedBuild> incidentBuilds = findIncidentBuilds(bt, bh);
     if (incidentBuilds == null) {
       situation.setIncident(null);
       situation.setTrack(null);
@@ -49,29 +49,33 @@ abstract class Logic {
 
 
   @Nullable
-  static Incident findIncident(@NotNull final SBuildType bt) {
-    final Couple<SFinishedBuild> builds = findIncidentBuilds(bt);
+  static Incident findIncident(@NotNull final SBuildType bt,
+                               @NotNull final BuildHistory bh) {
+    final Couple<SFinishedBuild> builds = findIncidentBuilds(bt, bh);
     return builds != null ? new Incident(builds) : null;
   }
 
 
 
   @Nullable
-  static Couple<SFinishedBuild> findIncidentBuilds(@NotNull final SBuildType bt) {
+  static Couple<SFinishedBuild> findIncidentBuilds(@NotNull final SBuildType bt, BuildHistory bh) {
     SFinishedBuild lastBuild = getLastBuild(bt);
     if (lastBuild == null) return null;
     if (!lastBuild.getBuildStatus().isFailed()) return null;
+
+    final BuildTypeEx bte = (BuildTypeEx) bt;
+    final BuildTypeOrderedBuilds ob = bte.getBuildTypeOrderedBuilds();
 
     SFinishedBuild rb,
                    gb = null;
     boolean incidentFound = false;
     rb = lastBuild;
-    SFinishedBuild nb = rb.getPreviousFinished();
+    SFinishedBuild nb = getPrevBuild(rb, ob, bh);
     while (nb != null) {
       Status status = nb.getBuildStatus();
       if (status.isFailed()) {
         rb = nb;
-        nb = rb.getPreviousFinished();
+        nb = getPrevBuild(rb, ob, bh);
         continue;
       }
       if (status.isSuccessful()) {
@@ -84,6 +88,19 @@ abstract class Logic {
     if (!incidentFound) return null;
 
     return Couple.of(rb, gb);
+  }
+
+  @Nullable
+  private static SFinishedBuild getPrevBuild(SBuild rb, BuildTypeOrderedBuilds obs, BuildHistory bh) {
+    final List<OrderedBuild> list = obs.getBuildsBefore(rb);
+    if (list.isEmpty()) return null;
+    for (OrderedBuild ob : list) {
+      if (ob.isCanceled() || ob.isPersonal() || !ob.isFinishedBuild()) continue;
+      long buildId = ob.getBuildId();
+      SFinishedBuild build = bh.findEntry(buildId);
+      if (build != null) return build;
+    }
+    return null;
   }
 
   @Nullable
@@ -139,7 +156,7 @@ abstract class Logic {
     int innerPoints = backMiles.size()-1;
     int slots = situation.settings.getParallelLimit();  // TODO minus already queued/running
     double delta = (innerPoints + 1.0) / (slots + 1.0);
-    for (int i = 1; i <= slots; i++) {
+    for (int i = 0; i < slots; i++) {
       int index = (int) Math.round(i * delta);
       if (index >= backMiles.size()) continue;
       Long point = backMiles.get(index).getLastModification();

@@ -1,6 +1,7 @@
 package org.jetbrains.teamcity.wbb;
 
 import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.ProjectManager;
 import jetbrains.buildServer.serverSide.SBuildServer;
 import jetbrains.buildServer.serverSide.SBuildType;
@@ -28,17 +29,21 @@ public class WbbController extends BaseController {
   @NotNull
   private final ProjectManager myProjectManager;
 
+  @NotNull
+  private final BuildHistory myBuildHistory;
 
 
   public WbbController(@NotNull final SBuildServer server,
                        @NotNull final WebControllerManager wcm,
                        @NotNull final Situations situations,
                        @NotNull final WbbBuildStarter buildStarter,
-                       @NotNull final ProjectManager projectManager) {
+                       @NotNull final ProjectManager projectManager,
+                       @NotNull final BuildHistory buildHistory) {
     super(server);
     mySituations = situations;
     myBuildStarter = buildStarter;
     myProjectManager = projectManager;
+    myBuildHistory = buildHistory;
     wcm.registerController("/wbb/**", this);
   }
 
@@ -66,7 +71,7 @@ public class WbbController extends BaseController {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
-    Logic.refreshSituation(situation, bt);
+    Logic.refreshSituation(situation, bt, myBuildHistory);
     if (situation.isInIncident()) {
       myBuildStarter.startIteration(situation, bt);
     }

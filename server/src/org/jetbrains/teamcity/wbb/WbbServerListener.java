@@ -1,5 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.serverSide.BuildHistory;
 import jetbrains.buildServer.serverSide.BuildServerAdapter;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SRunningBuild;
@@ -17,10 +18,17 @@ public class WbbServerListener extends BuildServerAdapter {
   private final WbbBuildStarter myBuildStarter;
 
 
+  @NotNull
+  private final BuildHistory myBuildHistory;
+
+
+
   public WbbServerListener(@NotNull final Situations situations,
-                           @NotNull final WbbBuildStarter buildStarter) {
+                           @NotNull final WbbBuildStarter buildStarter,
+                           @NotNull final BuildHistory buildHistory) {
     mySituations = situations;
     myBuildStarter = buildStarter;
+    myBuildHistory = buildHistory;
   }
 
 
@@ -33,7 +41,7 @@ public class WbbServerListener extends BuildServerAdapter {
 
     final Situation situation = mySituations.getOrCreateFor(bt);
     situation.setValid(false);
-    Logic.refreshSituation(situation, bt);
+    Logic.refreshSituation(situation, bt, myBuildHistory);
 
     if (situation.settings.isAutoBuild()) {
       myBuildStarter.startIteration(situation, bt);

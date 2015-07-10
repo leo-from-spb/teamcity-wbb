@@ -42,6 +42,7 @@ public class WbbBuildStarter {
                @NotNull final SortedSet<Long> revisionsIds) {
     for (Long revisionId : revisionsIds) {
       enqueue(situation, bt, revisionId);
+      situation.setValid(false);
     }
   }
 
