@@ -11,6 +11,8 @@ public class WbbSettings {
 
   private boolean myAutoAssign = true;
 
+  private boolean myDoubleCheck = false;
+
   private int myParallelLimit = 3;
 
 
@@ -28,6 +30,14 @@ public class WbbSettings {
 
   public void setAutoAssign(boolean autoAssign) {
     myAutoAssign = autoAssign;
+  }
+
+  public boolean isDoubleCheck() {
+    return myDoubleCheck;
+  }
+
+  public void setDoubleCheck(boolean doubleCheck) {
+    myDoubleCheck = doubleCheck;
   }
 
   public int getParallelLimit() {

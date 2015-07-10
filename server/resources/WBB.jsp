@@ -13,7 +13,7 @@
 
     <c:if test="${sb.situation.inIncident}">
 
-        <table>
+        <table width="90%">
 
             <c:if test="${not empty sb.redBuild}">
                 <tr>
@@ -105,13 +105,6 @@
 
         </table>
 
-        <br/>
-        <form action="/wbb/button.html">
-            <input type="button" value="Do Once" onclick="{return WbbForm.doAction('iteration')}"/>
-            <input type="button" value="Auto ON" onclick="{return WbbForm.doAction('autoON')}"/>
-            <input type="button" value="Auto OFF" onclick="{return WbbForm.doAction('autoOFF')}"/>
-        </form>
-
 
     </c:if>
 
@@ -129,9 +122,46 @@
 
     <c:if test="${not empty sb.autoAssignedUser}">
         <br/>
+        <p>
         Automatically assigned investigation to
         <b><c:out value="${sb.autoAssignedUser.name}"/></b>
+        </p>
     </c:if>
+
+
+    <br/>
+    <div>
+        <b>Settings:</b>
+        <table>
+            <tr>
+                <td>Start to find who broke build automatically:</td>
+                <td>${sb.autoStart}</td>
+            </tr>
+            <tr>
+                <td>Automatically assign investigations:</td>
+                <td>${sb.autoAssign}</td>
+            </tr>
+            <tr>
+                <td>Double check:</td>
+                <td>${sb.doubleCheck}</td>
+            </tr>
+            <tr>
+                <td>Maximum parallel builds:</td>
+                <td>${sb.parallelLimit}</td>
+            </tr>
+        </table>
+
+        <br/>
+        <form action="/wbb/button.html">
+            <input type="button" value="Do Once" onclick="{return WbbForm.doAction('iteration')}"/>
+            <input type="button" value="Auto ON" onclick="{return WbbForm.doAction('autoON')}"/>
+            <input type="button" value="Auto OFF" onclick="{return WbbForm.doAction('autoOFF')}"/>
+        </form>
+    </div>
+
+
+
+
 
 
     <script type="text/javascript">

@@ -167,4 +167,21 @@ public class SituationBean {
     return myUserModel.findUserById(aauId);
   }
 
+
+  public String getAutoStart() {
+    return mySituation.settings.isAutoBuild() ? "ON" : "off";
+  }
+
+  public String getAutoAssign() {
+    return mySituation.settings.isAutoAssign() ? "ON" : "off";
+  }
+
+  public String getDoubleCheck() {
+    return mySituation.settings.isDoubleCheck() ? "ON" : "off";
+  }
+
+  public int getParallelLimit() {
+    return mySituation.settings.getParallelLimit();
+  }
+
 }

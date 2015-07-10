@@ -99,7 +99,7 @@ public class WbbController extends BaseController {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
-    situation.settings.setAutoAssign(true);
+    situation.settings.setAutoBuild(true);
     Logic.refreshSituation(situation, bt, myBuildHistory, myBuildQueue, myRunningBuildsManager);
     if (situation.isInIncident()) {
       myBuildStarter.startIteration(situation, bt);
@@ -110,7 +110,7 @@ public class WbbController extends BaseController {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
-    situation.settings.setAutoAssign(false);
+    situation.settings.setAutoBuild(false);
   }
 
 
