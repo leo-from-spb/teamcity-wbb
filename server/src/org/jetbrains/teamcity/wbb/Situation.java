@@ -2,6 +2,8 @@ package org.jetbrains.teamcity.wbb;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.SortedSet;
+
 /**
  * @author Leonid Bushuev from JetBrains
  **/
@@ -34,9 +36,10 @@ public class Situation {
   @Nullable
   private Track myTrack;
 
+  @Nullable
+  private SortedSet<IntermediateBuild> myIntermediateBuilds;
 
   private long myAssignedToUserId;
-
 
   private boolean myValid;
 
@@ -85,6 +88,14 @@ public class Situation {
     return myTrack != null && myTrack.miles != null && !myTrack.miles.isEmpty();
   }
 
+  @Nullable
+  public SortedSet<IntermediateBuild> getIntermediateBuilds() {
+    return myIntermediateBuilds;
+  }
+
+  public void setIntermediateBuilds(@Nullable SortedSet<IntermediateBuild> intermediateBuilds) {
+    myIntermediateBuilds = intermediateBuilds;
+  }
 
   public long getAssignedToUserId() {
     return myAssignedToUserId;

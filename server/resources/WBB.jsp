@@ -7,6 +7,8 @@
 
 <jsp:useBean id="sb" type="org.jetbrains.teamcity.wbb.SituationBean" scope="request"/>
 
+<br/>
+
 <div>
 
     <c:if test="${sb.situation.inIncident}">
@@ -36,11 +38,47 @@
                 </tr>
             </c:if>
 
-            <c:if test="${not empty sb.redBuild and not empty sb.greenBuild}">
+            <tr>
+                <td colspan="7">&nbsp;</td>
+            </tr>
+
+            <c:if test="${sb.hasIntermediateBuilds}">
                 <tr>
-                    <td colspan="7">&nbsp;</td>
+                    <td colspan="7"><b>Intermediate builds:</b></td>
                 </tr>
+                <c:forEach items="${sb.intermediateBuilds}" var="ib">
+                    <tr>
+                        <c:if test="${not empty ib.queuedBuild}">
+                            <bs:queuedBuild queuedBuild="${ib.queuedBuild}"
+                                            estimateColspan="4"
+                                            showNumber="true"
+                                            showBranches="true"
+                                            hideIcon="false"/>
+                        </c:if>
+                        <c:if test="${not empty ib.runningBuild}">
+                            <bs:buildRow build="${ib.runningBuild}"
+                                         showBranchName="false"
+                                         showBuildNumber="true"
+                                         showStatus="true"
+                                         showArtifacts="true"
+                                         showCompactArtifacts="true"
+                                         showChanges="true"
+                                         showStartDate="true"
+                                         showDuration="true"
+                                         showProgress="false"
+                                         showStop="false"
+                                         showAgent="true"
+                                         showPin="false"
+                                         showTags="false"
+                                         showUsedByOtherBuildsIcon="true"/>
+                        </c:if>
+                    </tr>
+                </c:forEach>
             </c:if>
+
+            <tr>
+                <td colspan="7">&nbsp;</td>
+            </tr>
 
             <c:if test="${not empty sb.greenBuild}">
                 <tr>

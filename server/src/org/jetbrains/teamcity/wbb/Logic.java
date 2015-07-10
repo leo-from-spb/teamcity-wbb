@@ -1,5 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
+import jetbrains.buildServer.BuildType;
 import jetbrains.buildServer.messages.Status;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.Couple;
@@ -18,7 +19,9 @@ abstract class Logic {
 
   static void refreshSituation(@NotNull final Situation situation,
                                @NotNull final SBuildType bt,
-                               @NotNull final BuildHistory bh) {
+                               @NotNull final BuildHistory bh,
+                               @NotNull final BuildQueue buildQueue,
+                               @NotNull final RunningBuildsManager runningBuildsManager) {
     boolean valid = situation.isValid();
     if (valid) {
       final List<SFinishedBuild> history1 = bt.getHistory(null, true, false);
@@ -35,6 +38,7 @@ abstract class Logic {
       situation.setIncident(null);
       situation.setTrack(null);
       situation.setAssignedToUserId(0);
+      situation.setIntermediateBuilds(null);
       situation.setValid(true);
       return;
     }
@@ -44,6 +48,10 @@ abstract class Logic {
 
     final Track track = analyzeChanges(incidentBuilds);
     situation.setTrack(track);
+
+    final SortedSet<IntermediateBuild> intermediateBuilds =
+            analyzeIntermediateBuilds(track, bt, buildQueue, runningBuildsManager);
+    situation.setIntermediateBuilds(intermediateBuilds);
 
     situation.setValid(true);
   }
@@ -144,6 +152,45 @@ abstract class Logic {
     final List<Long> committerIds = change.getCommitterIds();
     if (committerIds.isEmpty()) return 0;
     else return committerIds.get(0);
+  }
+
+
+  public static SortedSet<IntermediateBuild> analyzeIntermediateBuilds(@NotNull final Track track,
+                                                                       @NotNull final BuildType bt,
+                                                                       @NotNull final BuildQueue buildQueue,
+                                                                       @NotNull final RunningBuildsManager runningBuildsManager) {
+    final String btId = bt.getBuildTypeId();
+    final SortedSet<IntermediateBuild> results = new TreeSet<IntermediateBuild>();
+    final SortedSet<Long> changeIds = track.getAllChangeIds();
+
+    // look through queued builds
+    final List<SQueuedBuild> queuedBuilds = buildQueue.getItems(btId);
+    for (SQueuedBuild queuedBuild : queuedBuilds) {
+      if (queuedBuild.isPersonal()) continue;
+      final BuildPromotion promotion = queuedBuild.getBuildPromotion();
+      final Long modificationId = promotion.getLastModificationId();
+      if (modificationId == null) continue;
+      if (!changeIds.contains(modificationId)) continue;
+      results.add(new IntermediateBuild(modificationId, promotion.getId(), queuedBuild.getItemId()));
+    }
+
+    // look through running builds
+    final List<SRunningBuild> runningBuilds =
+            runningBuildsManager.getRunningBuilds(null, new BuildDataFilter() {
+              @Override
+              public boolean accept(@NotNull SBuild b) {
+                return b.getBuildTypeId().equals(btId) && !b.isPersonal();
+              }
+            });
+    for (SRunningBuild runningBuild : runningBuilds) {
+      final BuildPromotion promotion = runningBuild.getBuildPromotion();
+      final Long modificationId = promotion.getLastModificationId();
+      if (modificationId == null) continue;
+      if (!changeIds.contains(modificationId)) continue;
+      results.add(new IntermediateBuild(modificationId, promotion.getId(), runningBuild.getBuildId()));
+    }
+
+    return results;
   }
 
 

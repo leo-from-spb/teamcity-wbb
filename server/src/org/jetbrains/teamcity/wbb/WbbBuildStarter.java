@@ -1,9 +1,7 @@
 package org.jetbrains.teamcity.wbb;
 
-import jetbrains.buildServer.serverSide.BuildCustomizerEx;
-import jetbrains.buildServer.serverSide.BuildCustomizerFactory;
-import jetbrains.buildServer.serverSide.BuildPromotion;
-import jetbrains.buildServer.serverSide.SBuildType;
+import jetbrains.buildServer.serverSide.*;
+import jetbrains.buildServer.serverSide.impl.BuildQueueImpl;
 import jetbrains.buildServer.vcs.SVcsModification;
 import jetbrains.buildServer.vcs.VcsModificationHistory;
 import org.jetbrains.annotations.NotNull;
@@ -55,9 +53,12 @@ public class WbbBuildStarter {
     final BuildCustomizerEx bc = (BuildCustomizerEx) myBuildCustomizerFactory.createBuildCustomizer(bt, null);
     //bc.setDesiredBranchName(???);
     bc.setChangesUpTo(modification);
-    bc.setStickToRevisions(true);
+    //bc.setFreezeSettings(true);
+    //bc.setStickToRevisions(true);
     final BuildPromotion promotion = bc.createPromotion();
-    promotion.addToQueue("Automatically by WBB plugin");
+    TriggeredByBuilder tbb = new TriggeredByBuilder();
+    tbb.addParameter(BuildQueueImpl.TRIGGERED_BY_QUEUE_MERGING_ENABLED_PARAM, "false");
+    promotion.addToQueue(tbb.toString());
   }
 
 

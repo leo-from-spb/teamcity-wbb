@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * @author Leonid Bushuev from JetBrains
@@ -15,20 +17,20 @@ public class Track {
     public final long authorId;
 
     @NotNull
-    public final List<Revision> modificationIds;
+    public final List<Revision> revisions;
 
 
-    public Mile(long authorId, @NotNull List<Revision> modificationIds) {
+    public Mile(long authorId, @NotNull List<Revision> revisions) {
       this.authorId = authorId;
-      this.modificationIds = ImmutableList.copyOf(modificationIds);
-      assert !modificationIds.isEmpty();
+      this.revisions = ImmutableList.copyOf(revisions);
+      assert !revisions.isEmpty();
     }
 
 
     @NotNull
     public Long getLastModification() {
-      int n = modificationIds.size();
-      return modificationIds.get(n - 1).id;
+      int n = revisions.size();
+      return revisions.get(n - 1).id;
     }
 
   }
@@ -56,6 +58,15 @@ public class Track {
 
   public long getRevealedAuthorId() {
     return miles.size() == 1 ? miles.get(0).authorId : 0;
+  }
+
+
+  public SortedSet<Long> getAllChangeIds() {
+    SortedSet<Long> ids = new TreeSet<Long>();
+    for (Mile mile : miles) {
+      for (Revision revision : mile.revisions) ids.add(revision.id);
+    }
+    return ids;
   }
 
 }

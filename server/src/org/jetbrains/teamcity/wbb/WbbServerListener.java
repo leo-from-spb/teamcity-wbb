@@ -3,10 +3,7 @@ package org.jetbrains.teamcity.wbb;
 import jetbrains.buildServer.responsibility.BuildTypeResponsibilityFacade;
 import jetbrains.buildServer.responsibility.ResponsibilityEntry;
 import jetbrains.buildServer.responsibility.ResponsibilityEntryFactory;
-import jetbrains.buildServer.serverSide.BuildHistory;
-import jetbrains.buildServer.serverSide.BuildServerAdapter;
-import jetbrains.buildServer.serverSide.SBuildType;
-import jetbrains.buildServer.serverSide.SRunningBuild;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +31,12 @@ public class WbbServerListener extends BuildServerAdapter {
   @NotNull
   private final UserModel myUserModel;
 
+  @NotNull
+  private final BuildQueue myBuildQueue;
+
+  @NotNull
+  private final RunningBuildsManager myRunningBuildsManager;
+
 
   private static final String AUTO_ASSIGNED_COMMENT =
           "Automatically assigned by WBB plugin";
@@ -44,12 +47,16 @@ public class WbbServerListener extends BuildServerAdapter {
                            @NotNull final WbbBuildStarter buildStarter,
                            @NotNull final BuildHistory buildHistory,
                            @NotNull final BuildTypeResponsibilityFacade responsibilityFacade,
-                           @NotNull final UserModel userModel) {
+                           @NotNull final UserModel userModel,
+                           @NotNull final BuildQueue buildQueue,
+                           @NotNull final RunningBuildsManager runningBuildsManager) {
     mySituations = situations;
     myBuildStarter = buildStarter;
     myBuildHistory = buildHistory;
     myResponsibilityFacade = responsibilityFacade;
     myUserModel = userModel;
+    myBuildQueue = buildQueue;
+    myRunningBuildsManager = runningBuildsManager;
   }
 
 
@@ -62,7 +69,7 @@ public class WbbServerListener extends BuildServerAdapter {
 
     final Situation situation = mySituations.getOrCreateFor(bt);
     situation.setValid(false);
-    Logic.refreshSituation(situation, bt, myBuildHistory);
+    Logic.refreshSituation(situation, bt, myBuildHistory, myBuildQueue, myRunningBuildsManager);
 
     final Track track = situation.getTrack();
     if (track == null) return;
