@@ -126,6 +126,7 @@
         Automatically assigned investigation to
         <b><c:out value="${sb.autoAssignedUser.name}"/></b>
         </p>
+        <br/>
     </c:if>
 
 
