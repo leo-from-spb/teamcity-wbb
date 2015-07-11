@@ -138,6 +138,20 @@ public class SituationBean {
   }
 
 
+  public boolean isHasTrack() {
+    return mySituation.getTrack() != null;
+  }
+
+
+  public int getChangeCount() {
+    final Track track = mySituation.getTrack();
+    return track != null ? track.changeCount : 0;
+  }
+
+  public int getGroupedChangeCount() {
+    final Track track = mySituation.getTrack();
+    return track != null ? track.miles.size() : 0;
+  }
 
 
   @Nullable

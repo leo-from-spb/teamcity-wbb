@@ -2,6 +2,7 @@ package org.jetbrains.teamcity.wbb;
 
 import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -38,9 +39,16 @@ public class Track {
 
   public final List<Mile> miles;
 
+  public final int changeCount;
+
+
 
   public Track(List<Mile> miles) {
     this.miles = miles;
+
+    int cc = 0;
+    for (Mile mile : miles) cc += mile.revisions.size();
+    changeCount = cc;
   }
 
 
@@ -56,8 +64,9 @@ public class Track {
     return miles.size() == 1 && miles.get(0).authorId > 0;
   }
 
-  public long getRevealedAuthorId() {
-    return miles.size() == 1 ? miles.get(0).authorId : 0;
+  @Nullable
+  public Mile getRevealedMile() {
+    return miles.size() == 1 ? miles.get(0) : null;
   }
 
 

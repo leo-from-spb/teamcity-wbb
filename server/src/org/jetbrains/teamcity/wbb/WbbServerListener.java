@@ -9,6 +9,7 @@ import jetbrains.buildServer.users.UserModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Leonid Bushuev from JetBrains
@@ -39,7 +40,7 @@ public class WbbServerListener extends BuildServerAdapter {
 
 
   private static final String AUTO_ASSIGNED_COMMENT =
-          "Automatically assigned by WBB plugin";
+          "Automatically assigned by WBB plugin.";
 
 
 
@@ -76,12 +77,25 @@ public class WbbServerListener extends BuildServerAdapter {
 
     if (track.isAuthorRevealed()) {
       if (!situation.isAlreadyAssigned()) {
-        long authorId = track.getRevealedAuthorId();
+        final Track.Mile revealedMile = track.getRevealedMile();
+        if (revealedMile == null) return;
+        long authorId = revealedMile.authorId;
         SUser author = myUserModel.findUserById(authorId);
         if (author == null) return;
         ResponsibilityEntry responsibility =
                 myResponsibilityFacade.findBuildTypeResponsibility(bt);
         if (responsibility != null && responsibility.getState() == ResponsibilityEntry.State.TAKEN) return; // already taken
+
+        final List<Revision> revisions = revealedMile.revisions;
+        StringBuilder message = new StringBuilder(AUTO_ASSIGNED_COMMENT);
+        message.append('\n');
+        message.append(revisions.size() == 1
+                       ? "The change that might broken the build:\n"
+                       : "Changes that might broken the build:\n");
+        for (Revision revision : revisions) {
+          message.append(revision.comment);
+          if (!revision.comment.endsWith("\n")) message.append('\n');
+        }
 
         ResponsibilityEntry newEntry =
                 ResponsibilityEntryFactory.createEntry(bt,
@@ -89,7 +103,7 @@ public class WbbServerListener extends BuildServerAdapter {
                                                        author,
                                                        null,
                                                        new Date(),
-                                                       AUTO_ASSIGNED_COMMENT,
+                                                       message.toString(),
                                                        ResponsibilityEntry.RemoveMethod.WHEN_FIXED);
         myResponsibilityFacade.setBuildTypeResponsibility(bt, newEntry);
         situation.setAssignedToUserId(authorId);

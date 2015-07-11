@@ -9,6 +9,16 @@
 
 <br/>
 
+<style type="text/css">
+
+    .dig {
+        color: mediumvioletred;
+    }
+
+</style>
+
+
+
 <div>
 
     <c:if test="${sb.situation.inIncident}">
@@ -108,22 +118,30 @@
 
     </c:if>
 
-    <c:if test="${not empty sb.authors}">
+    <c:if test="${sb.hasTrack}">
         <br/>
         <div>
-            <b>Suspected Authors:</b>
-            <ul>
-            <c:forEach items="${sb.authors}" var="a">
-                <li><c:out value="${a.name}"/></li>
-            </c:forEach>
-            </ul>
+            <b>Changes that might be the reason of the problem:</b><br/>
+            <b class="dig">${sb.changeCount}</b> changes (or <b class="dig">${sb.groupedChangeCount}</b> change groups, grouped by authors).<br>
+            <br/>
+            <c:if test="${not empty sb.authors}">
+                <div>
+                    Suspected Authors:
+                    <ul>
+                    <c:forEach items="${sb.authors}" var="a">
+                        <li><c:out value="${a.name}"/></li>
+                    </c:forEach>
+                    </ul>
+                </div>
+            </c:if>
         </div>
     </c:if>
+
 
     <c:if test="${not empty sb.autoAssignedUser}">
         <br/>
         <p>
-        Automatically assigned investigation to
+        Investigation was automatically assigned to
         <b><c:out value="${sb.autoAssignedUser.name}"/></b>
         </p>
         <br/>
