@@ -122,7 +122,7 @@
         <br/>
         <div>
             <b>Changes that might be the reason of the problem:</b><br/>
-            <b class="dig">${sb.changeCount}</b> changes (or <b class="dig">${sb.groupedChangeCount}</b> change groups, grouped by authors).<br>
+            There are <b class="dig">${sb.changeCount}</b> changes (in <b class="dig">${sb.groupedChangeCount}</b> change groups, grouped by authors).<br>
             <br/>
             <c:if test="${not empty sb.authors}">
                 <div>
@@ -165,7 +165,7 @@
                 <td>${sb.doubleCheck}</td>
             </tr>
             <tr>
-                <td>Also find change change that broke build:</td>
+                <td>Also find change that broke build:</td>
                 <td>${sb.alsoFindChange}</td>
             </tr>
             <tr>
