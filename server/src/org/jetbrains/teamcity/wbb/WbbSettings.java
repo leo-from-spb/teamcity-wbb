@@ -7,21 +7,23 @@ package org.jetbrains.teamcity.wbb;
  **/
 public class WbbSettings {
 
-  private boolean myAutoBuild = false;
+  private boolean myAutoActivate = false;
 
   private boolean myAutoAssign = true;
 
   private boolean myDoubleCheck = false;
 
+  private boolean myAlsoFindChange = false;
+
   private int myParallelLimit = 3;
 
 
-  public boolean isAutoBuild() {
-    return myAutoBuild;
+  public boolean isAutoActivate() {
+    return myAutoActivate;
   }
 
-  public void setAutoBuild(boolean autoBuild) {
-    myAutoBuild = autoBuild;
+  public void setAutoActivate(boolean autoActivate) {
+    myAutoActivate = autoActivate;
   }
 
   public boolean isAutoAssign() {
@@ -38,6 +40,14 @@ public class WbbSettings {
 
   public void setDoubleCheck(boolean doubleCheck) {
     myDoubleCheck = doubleCheck;
+  }
+
+  public boolean isAlsoFindChange() {
+    return myAlsoFindChange;
+  }
+
+  public void setAlsoFindChange(boolean alsoFindChange) {
+    myAlsoFindChange = alsoFindChange;
   }
 
   public int getParallelLimit() {

@@ -66,14 +66,17 @@ public class WbbController extends BaseController {
     String btName = getParameter(parameters, "buildTypeId");
     if (btName == null) return null;
 
-    if (operation.equalsIgnoreCase("iteration")) {
-      doIterateOnce(btName);
+    if (operation.equalsIgnoreCase("activate")) {
+      activate(btName);
+    }
+    if (operation.equalsIgnoreCase("deactivate")) {
+      deactivate(btName);
     }
     if (operation.equalsIgnoreCase("autoON")) {
-      doAutoOn(btName);
+      turnAutoOn(btName);
     }
     if (operation.equalsIgnoreCase("autoOFF")) {
-      doAutoOff(btName);
+      turnAutoOff(btName);
     }
 
     return null;
@@ -85,32 +88,44 @@ public class WbbController extends BaseController {
     return pa[0];
   }
 
-  private void doIterateOnce(@NotNull final String btName) {
+  private void activate(@NotNull final String btName) {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
     Logic.refreshSituation(situation, bt, myBuildHistory, myBuildQueue, myRunningBuildsManager);
     if (situation.isInIncident()) {
+      situation.setState(Situation.State.ACTIVE);
       myBuildStarter.startIteration(situation, bt);
     }
   }
 
-  private void doAutoOn(@NotNull final String btName) {
+  private void deactivate(@NotNull final String btName) {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
-    situation.settings.setAutoBuild(true);
+    if (situation.getState() == Situation.State.ACTIVE) {
+      situation.setState(Situation.State.RELAX);
+      // cancel queued builds
+    }
+  }
+
+  private void turnAutoOn(@NotNull final String btName) {
+    final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
+    if (bt == null) return;
+    final Situation situation = mySituations.getOrCreateFor(bt);
+    situation.settings.setAutoActivate(true);
     Logic.refreshSituation(situation, bt, myBuildHistory, myBuildQueue, myRunningBuildsManager);
     if (situation.isInIncident()) {
+      if (situation.getState() == Situation.State.RELAX) situation.setState(Situation.State.ACTIVE);
       myBuildStarter.startIteration(situation, bt);
     }
   }
 
-  private void doAutoOff(@NotNull final String btName) {
+  private void turnAutoOff(@NotNull final String btName) {
     final SBuildType bt = myProjectManager.findBuildTypeByExternalId(btName);
     if (bt == null) return;
     final Situation situation = mySituations.getOrCreateFor(bt);
-    situation.settings.setAutoBuild(false);
+    situation.settings.setAutoActivate(false);
   }
 
 

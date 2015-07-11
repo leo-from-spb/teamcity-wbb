@@ -107,10 +107,11 @@ public class WbbServerListener extends BuildServerAdapter {
                                                        ResponsibilityEntry.RemoveMethod.WHEN_FIXED);
         myResponsibilityFacade.setBuildTypeResponsibility(bt, newEntry);
         situation.setAssignedToUserId(authorId);
+        situation.setState(Situation.State.DONE);
       }
     }
     else {
-      if (situation.settings.isAutoBuild()) {
+      if (situation.settings.isAutoActivate()) {
         myBuildStarter.startIteration(situation, bt);
       }
     }

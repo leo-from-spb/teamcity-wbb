@@ -154,7 +154,7 @@
         <table>
             <tr>
                 <td>Start to find who broke build automatically:</td>
-                <td>${sb.autoStart}</td>
+                <td>${sb.autoActivate}</td>
             </tr>
             <tr>
                 <td>Automatically assign investigations:</td>
@@ -165,6 +165,10 @@
                 <td>${sb.doubleCheck}</td>
             </tr>
             <tr>
+                <td>Also find change change that broke build:</td>
+                <td>${sb.alsoFindChange}</td>
+            </tr>
+            <tr>
                 <td>Maximum parallel builds:</td>
                 <td>${sb.parallelLimit}</td>
             </tr>
@@ -172,9 +176,10 @@
 
         <br/>
         <form action="/wbb/button.html">
-            <input type="button" value="Do Once" onclick="{return WbbForm.doAction('iteration')}"/>
-            <input type="button" value="Auto ON" onclick="{return WbbForm.doAction('autoON')}"/>
-            <input type="button" value="Auto OFF" onclick="{return WbbForm.doAction('autoOFF')}"/>
+            <input type="button" value="Start" onclick="{return WbbForm.doAction('activate')}"/> &nbsp;
+            <input type="button" value="Stop" onclick="{return WbbForm.doAction('deactivate')}"/> &nbsp;
+            <input type="button" value="Auto ON" onclick="{return WbbForm.doAction('autoON')}"/>  &nbsp;
+            <input type="button" value="Auto OFF" onclick="{return WbbForm.doAction('autoOFF')}"/> &nbsp;
         </form>
     </div>
 

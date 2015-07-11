@@ -17,11 +17,11 @@ import java.util.*;
 abstract class Logic {
 
 
-  static void refreshSituation(@NotNull final Situation situation,
-                               @NotNull final SBuildType bt,
-                               @NotNull final BuildHistory bh,
-                               @NotNull final BuildQueue buildQueue,
-                               @NotNull final RunningBuildsManager runningBuildsManager) {
+  static synchronized void refreshSituation(@NotNull final Situation situation,
+                                            @NotNull final SBuildType bt,
+                                            @NotNull final BuildHistory bh,
+                                            @NotNull final BuildQueue buildQueue,
+                                            @NotNull final RunningBuildsManager runningBuildsManager) {
     boolean valid = situation.isValid();
     if (valid) {
       final List<SFinishedBuild> history1 = bt.getHistory(null, true, false);
@@ -35,6 +35,7 @@ abstract class Logic {
     // refresh
     final Couple<SFinishedBuild> incidentBuilds = findIncidentBuilds(bt, bh);
     if (incidentBuilds == null) {
+      situation.setState(Situation.State.RELAX);
       situation.setIncident(null);
       situation.setTrack(null);
       situation.setAssignedToUserId(0);
@@ -53,17 +54,11 @@ abstract class Logic {
             analyzeIntermediateBuilds(track, bt, buildQueue, runningBuildsManager);
     situation.setIntermediateBuilds(intermediateBuilds);
 
+    if (situation.settings.isAutoActivate() && situation.getState() == Situation.State.RELAX) {
+      situation.setState(Situation.State.ACTIVE);
+    }
+
     situation.setValid(true);
-  }
-
-
-
-
-  @Nullable
-  static Incident findIncident(@NotNull final SBuildType bt,
-                               @NotNull final BuildHistory bh) {
-    final Couple<SFinishedBuild> builds = findIncidentBuilds(bt, bh);
-    return builds != null ? new Incident(builds) : null;
   }
 
 

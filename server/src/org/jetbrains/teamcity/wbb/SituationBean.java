@@ -80,6 +80,10 @@ public class SituationBean {
     return myBt;
   }
 
+  public WbbSettings getSettings() {
+    return mySituation.settings;
+  }
+
 
   @Nullable
   public SFinishedBuild getGreenBuild() {
@@ -182,8 +186,8 @@ public class SituationBean {
   }
 
 
-  public String getAutoStart() {
-    return mySituation.settings.isAutoBuild() ? "ON" : "off";
+  public String getAutoActivate() {
+    return mySituation.settings.isAutoActivate() ? "ON" : "off";
   }
 
   public String getAutoAssign() {
@@ -192,6 +196,10 @@ public class SituationBean {
 
   public String getDoubleCheck() {
     return mySituation.settings.isDoubleCheck() ? "ON" : "off";
+  }
+
+  public String getAlsoFindChange() {
+    return mySituation.settings.isAlsoFindChange() ? "ON" : "off";
   }
 
   public int getParallelLimit() {

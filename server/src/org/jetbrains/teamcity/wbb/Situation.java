@@ -1,5 +1,6 @@
 package org.jetbrains.teamcity.wbb;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.SortedSet;
@@ -8,6 +9,14 @@ import java.util.SortedSet;
  * @author Leonid Bushuev from JetBrains
  **/
 public class Situation {
+
+
+  public enum State {
+    RELAX,
+    ACTIVE,
+    DONE
+  }
+
 
   //// IDENTITY STATE AND SETTINGS \\\\
 
@@ -27,6 +36,9 @@ public class Situation {
 
 
   //// VARIABLE STATE \\\\
+
+  @NotNull
+  private State myState = State.RELAX;
 
   private long myLastKnownBuildId;
 
@@ -51,6 +63,15 @@ public class Situation {
     this.btName = btName;
   }
 
+
+  @NotNull
+  public State getState() {
+    return myState;
+  }
+
+  public void setState(@NotNull final State state) {
+    myState = state;
+  }
 
   public long getLastKnownBuildId() {
     return myLastKnownBuildId;
